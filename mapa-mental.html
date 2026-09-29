@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa do Captador</title>
+<style>
+  :root {
+    --bg:#f7f7f4; --card:#ffffff; --tx:#1d2330; --mut:#5d6675; --line:#c9cdd4;
+    --c1:#2f6fdb; --c2:#7a4fd6; --c3:#0f8f86; --c4:#2e8a3e;
+    --c5:#c07a00; --c6:#d2553a; --c7:#c0334d; --c8:#46607e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#14171c; --card:#1d2129; --tx:#e8eaee; --mut:#9aa3b2; --line:#3a404b;
+      --c1:#6d9cf0; --c2:#a88af0; --c3:#3cc0b5; --c4:#5cc26d;
+      --c5:#e6a73a; --c6:#f0856b; --c7:#ef6b83; --c8:#8fa6c4;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:#14171c; --card:#1d2129; --tx:#e8eaee; --mut:#9aa3b2; --line:#3a404b;
+    --c1:#6d9cf0; --c2:#a88af0; --c3:#3cc0b5; --c4:#5cc26d;
+    --c5:#e6a73a; --c6:#f0856b; --c7:#ef6b83; --c8:#8fa6c4;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--tx); font-family:system-ui, "Segoe UI", sans-serif; }
+  header { max-width:1400px; margin:0 auto; padding:24px 16px 0; }
+  h1 { margin:0; font-size:22px; }
+  header p { margin:4px 0 0; color:var(--mut); font-size:14px; }
+  .wrap { max-width:1400px; margin:0 auto; padding:8px 16px 24px; overflow-x:auto; }
+  svg { width:100%; min-width:900px; height:auto; display:block; }
+  .box { fill:var(--card); stroke-width:2; }
+  .t { font-size:17px; font-weight:700; }
+  .b { font-size:13.5px; fill:var(--tx); }
+  .x { fill:var(--c7); font-weight:600; }
+  .edge { fill:none; stroke-width:3; opacity:.55; }
+  .ctitle { font-size:26px; font-weight:800; fill:#fff; }
+  .csub { font-size:15px; fill:#ffffffd9; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mapa mental: Captador (modelo "endereço → proprietário")</h1>
+  <p>Estudo para a Beam Broker a partir do modelo do buscacheckonn.com · valores são estimativas a validar</p>
+</header>
+<div class="wrap">
+<svg viewBox="0 0 1400 960" role="img" aria-label="Mapa mental do modelo de negócio do Captador">
+  <!-- Ligações: esquerda -->
+  <path class="edge" style="stroke:var(--c1)" d="M560,480 C450,480 470,135 360,135"/>
+  <path class="edge" style="stroke:var(--c2)" d="M560,480 C450,480 470,365 360,365"/>
+  <path class="edge" style="stroke:var(--c3)" d="M560,480 C450,480 470,595 360,595"/>
+  <path class="edge" style="stroke:var(--c4)" d="M560,480 C450,480 470,825 360,825"/>
+  <!-- Ligações: direita -->
+  <path class="edge" style="stroke:var(--c5)" d="M840,480 C950,480 930,135 1040,135"/>
+  <path class="edge" style="stroke:var(--c6)" d="M840,480 C950,480 930,365 1040,365"/>
+  <path class="edge" style="stroke:var(--c7)" d="M840,480 C950,480 930,595 1040,595"/>
+  <path class="edge" style="stroke:var(--c8)" d="M840,480 C950,480 930,825 1040,825"/>
+
+  <!-- Centro -->
+  <rect x="560" y="385" width="280" height="190" rx="22" style="fill:var(--tx)"/>
+  <rect x="560" y="385" width="280" height="190" rx="22" style="fill:var(--c1);opacity:.92"/>
+  <text x="700" y="445" text-anchor="middle" class="ctitle">Captador</text>
+  <text x="700" y="480" text-anchor="middle" class="csub">Endereço → Dono → Contato</text>
+  <text x="700" y="510" text-anchor="middle" class="csub">para os corretores da Beam</text>
+  <text x="700" y="540" text-anchor="middle" class="csub">captarem mais e mais barato</text>
+
+  <!-- 1 Referência -->
+  <g transform="translate(40,45)">
+    <rect class="box" width="320" height="180" rx="14" style="stroke:var(--c1)"/>
+    <text x="18" y="32" class="t" style="fill:var(--c1)">1 · Referência: Busca Checkonn</text>
+    <text x="18" y="60" class="b">• Data broker desde 2016 (Barueri/SP)</text>
+    <text x="18" y="82" class="b">• Busca por nome, CPF, endereço, placa</text>
+    <text x="18" y="104" class="b">• Entrega telefone, CPF, parentes, veículos</text>
+    <text x="18" y="126" class="b">• Receita: créditos/pacotes + API</text>
+    <text x="18" y="148" class="b x">• Ponto fraco: origem dos dados (LGPD)</text>
+  </g>
+
+  <!-- 2 Problema -->
+  <g transform="translate(40,275)">
+    <rect class="box" width="320" height="180" rx="14" style="stroke:var(--c2)"/>
+    <text x="18" y="32" class="t" style="fill:var(--c2)">2 · Problema → Valor</text>
+    <text x="18" y="60" class="b">• Corretor vê o imóvel, só tem o endereço</text>
+    <text x="18" y="82" class="b">• Não sabe quem é o dono nem o contato</text>
+    <text x="18" y="104" class="b">• Solução: endereço → dono → WhatsApp</text>
+    <text x="18" y="126" class="b">• Mais captações exclusivas</text>
+    <text x="18" y="148" class="b">• Custo por captação menor</text>
+  </g>
+
+  <!-- 3 Fluxo -->
+  <g transform="translate(40,505)">
+    <rect class="box" width="320" height="180" rx="14" style="stroke:var(--c3)"/>
+    <text x="18" y="32" class="t" style="fill:var(--c3)">3 · Fluxo híbrido de dados</text>
+    <text x="18" y="60" class="b">① Endereço → bureau: quem mora lá</text>
+    <text x="18" y="82" class="b">② CPF → bureau: telefones / WhatsApp</text>
+    <text x="18" y="104" class="b">③ Lead bom → matrícula confirma o dono</text>
+    <text x="18" y="126" class="b">④ Card para o corretor + CRM</text>
+    <text x="18" y="148" class="b">• Base própria cresce a cada consulta</text>
+  </g>
+
+  <!-- 4 Fontes -->
+  <g transform="translate(40,735)">
+    <rect class="box" width="320" height="180" rx="14" style="stroke:var(--c4)"/>
+    <text x="18" y="32" class="t" style="fill:var(--c4)">4 · Fontes e matrícula</text>
+    <text x="18" y="60" class="b">• Matrícula é pública (Lei 6.015/73)</text>
+    <text x="18" y="82" class="b">• RI Digital (ONR): visualização/certidão</text>
+    <text x="18" y="104" class="b">• Automação: Infosimples (nº → PDF)</text>
+    <text x="18" y="126" class="b">• Gargalo: endereço → nº da matrícula</text>
+    <text x="18" y="148" class="b x">✗ Conta de água/luz: titular ≠ dono</text>
+  </g>
+
+  <!-- 5 Modelo -->
+  <g transform="translate(1040,45)">
+    <rect class="box" width="320" height="180" rx="14" style="stroke:var(--c5)"/>
+    <text x="18" y="32" class="t" style="fill:var(--c5)">5 · Modelo de negócio</text>
+    <text x="18" y="60" class="b">• Fase 1: ferramenta interna da Beam</text>
+    <text x="18" y="82" class="b">• Fase 2: SaaS para outros corretores</text>
+    <text x="18" y="104" class="b">• Créditos ~R$ 10–30/consulta ou plano</text>
+    <text x="18" y="126" class="b">• Fosso: base endereço ↔ matrícula</text>
+    <text x="18" y="148" class="b">• Monitor Registral = alerta de lead</text>
+  </g>
+
+  <!-- 6 Custos -->
+  <g transform="translate(1040,275)">
+    <rect class="box" width="320" height="180" rx="14" style="stroke:var(--c6)"/>
+    <text x="18" y="32" class="t" style="fill:var(--c6)">6 · Custos e métricas</text>
+    <text x="18" y="60" class="b">• Bureau ~R$ 0,30–3 · Matrícula ~R$ 20–90</text>
+    <text x="18" y="82" class="b">• Matrícula só quando o lead é bom</text>
+    <text x="18" y="104" class="b">• 1 em 20 consultas → ~R$ 1 mil/captação</text>
+    <text x="18" y="126" class="b">• Venda R$ 600 mil × 6% = R$ 36 mil</text>
+    <text x="18" y="148" class="b">• Funil: consulta → contato → captação</text>
+  </g>
+
+  <!-- 7 LGPD -->
+  <g transform="translate(1040,505)">
+    <rect class="box" width="320" height="180" rx="14" style="stroke:var(--c7)"/>
+    <text x="18" y="32" class="t" style="fill:var(--c7)">7 · LGPD e riscos</text>
+    <text x="18" y="60" class="b">• Legítimo interesse + teste documentado</text>
+    <text x="18" y="82" class="b">• Opt-out, log de consultas, DPO</text>
+    <text x="18" y="104" class="b">• Nunca base vazada ou comprada avulsa</text>
+    <text x="18" y="126" class="b">• WhatsApp 1:1, sem disparo em massa</text>
+    <text x="18" y="148" class="b">• Risco: dado velho / morador ≠ dono</text>
+  </g>
+
+  <!-- 8 MVP -->
+  <g transform="translate(1040,735)">
+    <rect class="box" width="320" height="180" rx="14" style="stroke:var(--c8)"/>
+    <text x="18" y="32" class="t" style="fill:var(--c8)">8 · MVP e roadmap</text>
+    <text x="18" y="60" class="b">• Pronto: Python + FastAPI + SQLite</text>
+    <text x="18" y="82" class="b">• Telas: Consulta · Fila · Relatório</text>
+    <text x="18" y="104" class="b">• Próximo: bureau real + Infosimples</text>
+    <text x="18" y="126" class="b">• Depois: login, CRM, lote CSV</text>
+    <text x="18" y="148" class="b">• Validar conversão → decidir o SaaS</text>
+  </g>
+</svg>
+</div>
+</body>
+</html>

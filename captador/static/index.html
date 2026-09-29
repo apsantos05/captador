@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Captador</title>
+<meta name="description" content="Do endereço ao dono do imóvel: nome, telefone e WhatsApp para o corretor captar.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='7' width='28' height='18' rx='3' fill='%231F4E96'/%3E%3Crect x='4.5' y='9.5' width='23' height='13' rx='1.5' fill='none' stroke='white' stroke-width='1.5'/%3E%3Cpath d='M10 16h12' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --papel:#F1F3EF; --superficie:#FFFFFF; --tinta:#16323A; --tinta-2:#55696E; --linha:#D6DCD4; --linha-2:#E6EAE4;
+  --placa:#1F4E96; --placa-2:#173D76; --carimbo:#2F7D4F; --carimbo-bg:#E3F1E8; --aviso:#9A6414; --aviso-bg:#FBF0DC;
+  --erro:#B3261E; --erro-bg:#FBE7E5; --foco:#1F4E96; --zap:#1F7A45;
+  --display:"Barlow Semi Condensed", "Arial Narrow", sans-serif; --texto:"Barlow", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --papel:#0F1B1F; --superficie:#16262B; --tinta:#E6ECEA; --tinta-2:#9DB0B3; --linha:#2A3D42; --linha-2:#203237;
+    --placa:#2C5FAE; --placa-2:#224C8F; --carimbo:#5CB883; --carimbo-bg:#173127; --aviso:#E0AE52; --aviso-bg:#33280F;
+    --erro:#F08A80; --erro-bg:#3A1A17; --foco:#7FA6E6; --zap:#1F7A45;
+  }
+}
+:root[data-theme="dark"] {
+  --papel:#0F1B1F; --superficie:#16262B; --tinta:#E6ECEA; --tinta-2:#9DB0B3; --linha:#2A3D42; --linha-2:#203237;
+  --placa:#2C5FAE; --placa-2:#224C8F; --carimbo:#5CB883; --carimbo-bg:#173127; --aviso:#E0AE52; --aviso-bg:#33280F;
+  --erro:#F08A80; --erro-bg:#3A1A17; --foco:#7FA6E6; --zap:#1F7A45;
+}
+* { box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body { margin:0; background:var(--papel); color:var(--tinta); font:400 16px/1.5 var(--texto); }
+h1, h2, h3 { font-family:var(--display); font-weight:600; line-height:1.15; margin:0; letter-spacing:.005em; }
+h1 { font-size:2.25rem; } h2 { font-size:1.5rem; } h3 { font-size:1.2rem; }
+p { margin:0; }
+a { color:var(--placa); }
+:focus-visible { outline:3px solid var(--foco); outline-offset:2px; border-radius:6px; }
+.muted { color:var(--tinta-2); }
+.small { font-size:.875rem; }
+[hidden] { display:none !important; }
+
+/* ---------- controles ---------- */
+label { display:block; font-size:.875rem; font-weight:500; color:var(--tinta-2); margin-bottom:6px; }
+input, select { width:100%; font:inherit; color:var(--tinta); background:var(--superficie); border:1.5px solid var(--linha);
+  border-radius:8px; padding:10px 12px; min-height:44px; }
+input:focus, select:focus { border-color:var(--placa); outline:none; box-shadow:0 0 0 3px color-mix(in srgb, var(--placa) 22%, transparent); }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; font:600 1rem/1 var(--texto); border-radius:8px;
+  padding:12px 18px; min-height:44px; cursor:pointer; border:1.5px solid transparent; text-decoration:none; white-space:nowrap; }
+.btn-primario { background:var(--placa); color:#fff; }
+.btn-primario:hover { background:var(--placa-2); }
+.btn-sec { background:var(--superficie); color:var(--tinta); border-color:var(--linha); }
+.btn-sec:hover { border-color:var(--tinta-2); }
+.btn-zap { background:var(--zap); color:#fff; }
+.btn-zap:hover { background:#17613A; }
+.btn:disabled { opacity:.6; cursor:progress; }
+.btn-bloco { width:100%; }
+.campos { display:grid; gap:14px; }
+.campos-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+/* ---------- placa de rua (o elemento marcante) ---------- */
+.placa { display:inline-block; background:var(--placa); color:#fff; border-radius:7px; padding:5px;
+  box-shadow:0 1px 0 rgba(0,0,0,.25), 0 6px 16px -8px rgba(23,61,118,.6); }
+.placa > div { border:2px solid rgba(255,255,255,.92); border-radius:4px; padding:10px 18px 9px; }
+.placa .via { font:700 clamp(1.4rem, 4.2vw, 2.2rem)/1.05 var(--display); letter-spacing:.01em; }
+.placa .sub { font:500 .95rem/1.2 var(--display); opacity:.9; margin-top:4px; letter-spacing:.02em; }
+.placa-num > div { padding:10px 16px 9px; text-align:center; min-width:84px; }
+.placa-num .via { font-size:clamp(1.6rem, 4.6vw, 2.4rem); }
+.placas { display:flex; flex-wrap:wrap; gap:10px; align-items:stretch; }
+
+/* ---------- login ---------- */
+#v-login { min-height:100vh; display:grid; grid-template-columns:1.1fr 1fr; }
+.login-arte { background:var(--placa); color:#fff; padding:48px; display:flex; flex-direction:column; justify-content:space-between; gap:40px;
+  background-image:repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 64px), repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 64px); }
+.login-arte .placa { background:#fff; color:var(--placa); box-shadow:none; align-self:flex-start; }
+.login-arte .placa > div { border-color:var(--placa); }
+.login-arte h1 { font-size:clamp(2rem, 4vw, 3rem); max-width:16ch; }
+.login-arte p { max-width:44ch; opacity:.88; font-size:1.075rem; margin-top:14px; }
+.login-arte ol { margin:0; padding:0; list-style:none; display:grid; gap:10px; max-width:420px; }
+.login-arte li { display:flex; gap:12px; align-items:baseline; font-size:.975rem; }
+.login-arte li b { font:700 1.1rem var(--display); min-width:1.4em; opacity:.7; }
+.login-caixa { display:flex; align-items:center; justify-content:center; padding:40px 24px; }
+.login-caixa > div { width:100%; max-width:380px; display:grid; gap:24px; }
+.demo-opcoes { display:grid; gap:10px; }
+.demo-opcao { text-align:left; display:flex; gap:14px; align-items:center; padding:14px 16px; background:var(--superficie);
+  border:1.5px solid var(--linha); border-radius:10px; cursor:pointer; font:inherit; color:inherit; }
+.demo-opcao:hover { border-color:var(--placa); }
+.demo-opcao .av { width:40px; height:40px; border-radius:50%; background:var(--placa); color:#fff; display:grid; place-items:center; font:700 1rem var(--display); flex:none; }
+.demo-opcao b { display:block; }
+.separador { display:flex; align-items:center; gap:12px; color:var(--tinta-2); font-size:.875rem; }
+.separador::before, .separador::after { content:""; flex:1; height:1px; background:var(--linha); }
+
+/* ---------- app ---------- */
+.topo { position:sticky; top:0; z-index:5; background:color-mix(in srgb, var(--papel) 88%, transparent); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--linha); }
+.topo-in { max-width:1240px; margin:0 auto; padding:10px 20px; display:flex; align-items:center; gap:20px; }
+.marca { display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; }
+.marca .placa { padding:3px; border-radius:5px; box-shadow:none; }
+.marca .placa > div { padding:2px 8px; border-width:1.5px; border-radius:3px; font:700 1rem/1.2 var(--display); }
+nav.abas { display:flex; gap:4px; }
+nav.abas button { font:500 1rem var(--texto); color:var(--tinta-2); background:none; border:0; padding:8px 12px; border-radius:8px; cursor:pointer; white-space:nowrap; }
+nav.abas button[aria-current="page"] { color:var(--tinta); background:var(--superficie); box-shadow:inset 0 -2px 0 var(--placa); }
+.usuario { margin-left:auto; display:flex; align-items:center; gap:14px; font-size:.9rem; }
+.cota { color:var(--tinta-2); }
+.cota b { color:var(--tinta); font-weight:600; }
+.sair { background:none; border:0; color:var(--tinta-2); font:inherit; cursor:pointer; text-decoration:underline; padding:8px 4px; }
+main { max-width:1240px; margin:0 auto; padding:28px 20px 64px; }
+.faixa-demo { background:var(--aviso-bg); color:var(--aviso); font-size:.875rem; text-align:center; padding:6px 16px; }
+
+/* busca */
+.busca { display:grid; grid-template-columns:340px minmax(0, 1fr); gap:28px; align-items:start; }
+.painel-lateral { position:sticky; top:84px; display:grid; gap:20px; }
+.bloco { background:var(--superficie); border:1px solid var(--linha); border-radius:12px; padding:20px; }
+.bloco h2 { font-size:1.2rem; margin-bottom:14px; }
+.recentes { list-style:none; margin:0; padding:0; }
+.recentes button { width:100%; text-align:left; background:none; border:0; border-top:1px solid var(--linha-2); padding:10px 2px;
+  font:inherit; color:inherit; cursor:pointer; display:flex; justify-content:space-between; gap:10px; align-items:center; }
+.recentes li:first-child button { border-top:0; }
+.recentes button:hover .rua { color:var(--placa); }
+.rua { font-weight:500; }
+.selo { display:inline-flex; align-items:center; gap:6px; font-size:.8rem; font-weight:600; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+.selo-ok { background:var(--carimbo-bg); color:var(--carimbo); }
+.selo-aviso { background:var(--aviso-bg); color:var(--aviso); }
+.selo-neutro { background:var(--linha-2); color:var(--tinta-2); }
+.selo-placa { background:color-mix(in srgb, var(--placa) 12%, transparent); color:var(--placa); }
+
+.vazio { border:1.5px dashed var(--linha); border-radius:14px; padding:48px 32px; display:grid; gap:14px; justify-items:start; }
+.vazio h2 { font-size:1.8rem; max-width:22ch; }
+.vazio p { max-width:52ch; }
+
+.resultado { display:grid; gap:22px; }
+#resultado { scroll-margin-top:84px; }
+.cabeca { display:grid; gap:14px; }
+.cabeca-meta { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; }
+
+/* rota: as etapas do fluxo */
+.rota { list-style:none; margin:0; padding:0; display:grid; gap:0; position:relative; }
+.rota li { display:grid; grid-template-columns:28px 1fr auto; gap:12px; align-items:start; padding:7px 0; position:relative; }
+.rota li::before { content:""; position:absolute; left:13px; top:26px; bottom:-8px; width:2px; background:var(--linha); }
+.rota li:last-child::before { display:none; }
+.rota .ponto { width:28px; height:28px; border-radius:50%; background:var(--superficie); border:2px solid var(--placa); color:var(--placa);
+  display:grid; place-items:center; font:700 .85rem var(--display); position:relative; z-index:1; }
+.rota .etapa { font-weight:600; }
+.rota .det { color:var(--tinta-2); font-size:.9rem; }
+.rota .custo { font-size:.875rem; color:var(--tinta-2); font-variant-numeric:tabular-nums; padding-top:3px; }
+.rota.animar li { opacity:0; transform:translateY(4px); animation:entra .32s ease-out forwards; }
+@keyframes entra { to { opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce) { .rota.animar li { animation:none; opacity:1; transform:none; } }
+details.rota-caixa > summary { cursor:pointer; font-weight:600; list-style:none; display:flex; justify-content:space-between; gap:12px; }
+details.rota-caixa > summary::-webkit-details-marker { display:none; }
+details.rota-caixa > summary .muted { font-weight:400; }
+details.rota-caixa[open] > summary { margin-bottom:12px; }
+
+/* pessoas */
+.pessoas { display:grid; gap:14px; }
+.pessoa { background:var(--superficie); border:1px solid var(--linha); border-radius:12px; padding:20px; display:grid; gap:14px; }
+.pessoa.dono { border:2px solid var(--carimbo); }
+.pessoa-topo { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start; }
+.pessoa h3 { font-size:1.45rem; }
+.fones { display:grid; gap:8px; }
+.fone { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:10px 12px;
+  border-radius:8px; background:var(--papel); }
+.fone .num { font:600 1.15rem var(--display); font-variant-numeric:tabular-nums; letter-spacing:.02em; }
+.fone .acoes { display:flex; gap:8px; }
+.fone .btn { min-height:38px; padding:8px 14px; font-size:.925rem; }
+
+.aviso-lgpd { font-size:.875rem; color:var(--tinta-2); border-left:3px solid var(--linha); padding-left:12px; }
+.confirmar { border:2px dashed var(--aviso); border-radius:12px; padding:20px; display:grid; gap:14px; background:var(--superficie); }
+.confirmar h3 { font-size:1.25rem; }
+.faixa { border-radius:10px; padding:14px 16px; font-weight:500; }
+.faixa-ok { background:var(--carimbo-bg); color:var(--carimbo); }
+.faixa-aviso { background:var(--aviso-bg); color:var(--aviso); }
+.faixa-erro { background:var(--erro-bg); color:var(--erro); }
+.erro { color:var(--erro); font-size:.9rem; }
+.erro:empty { display:none; }
+.linha-form { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+.historico { list-style:none; margin:0; padding:0; display:grid; gap:8px; font-size:.925rem; }
+.historico li { display:flex; justify-content:space-between; gap:12px; border-top:1px solid var(--linha-2); padding-top:8px; }
+
+/* painel do gestor */
+.titulo-pagina { display:flex; justify-content:space-between; align-items:end; gap:16px; flex-wrap:wrap; margin-bottom:22px; }
+.numeros { display:grid; grid-template-columns:repeat(5, 1fr); background:var(--superficie); border:1px solid var(--linha); border-radius:12px; margin-bottom:22px; }
+.numeros > div { padding:18px 20px; border-left:1px solid var(--linha-2); }
+.numeros > div:first-child { border-left:0; }
+.numeros .n { font:600 2rem/1.1 var(--display); font-variant-numeric:tabular-nums; }
+.numeros .r { font-size:.875rem; color:var(--tinta-2); margin-top:4px; }
+.duas-col { display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); gap:22px; }
+.duas-col > *, main > div, .bloco { min-width:0; }
+.funil { display:grid; gap:12px; }
+.funil-linha { display:grid; grid-template-columns:96px minmax(0, 1fr) 36px; gap:12px; align-items:center; font-size:.95rem; }
+.funil-barra { height:26px; border-radius:5px; background:var(--linha-2); overflow:hidden; }
+.funil-barra span { display:block; height:100%; background:var(--placa); border-radius:5px; min-width:4px; }
+.funil-linha:last-child .funil-barra span { background:var(--carimbo); }
+.funil-linha b { text-align:right; font-variant-numeric:tabular-nums; }
+table { width:100%; border-collapse:collapse; font-size:.95rem; }
+th { text-align:left; font-weight:600; color:var(--tinta-2); font-size:.85rem; padding:0 8px 8px 0; border-bottom:1px solid var(--linha); }
+td { padding:10px 8px 10px 0; border-bottom:1px solid var(--linha-2); vertical-align:top; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+.tabela-rolagem { overflow-x:auto; }
+
+/* fila */
+.fila { display:grid; gap:16px; }
+.fila .bloco { display:grid; gap:14px; }
+.candidatos { font-size:.9rem; color:var(--tinta-2); }
+.candidatos:empty { display:none; }
+
+#toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--tinta); color:var(--papel);
+  padding:12px 18px; border-radius:10px; font-weight:500; z-index:20; max-width:calc(100% - 32px); }
+
+/* ---------- responsivo ---------- */
+@media (max-width: 980px) {
+  .busca { grid-template-columns:1fr; }
+  .painel-lateral { position:static; }
+  .numeros { grid-template-columns:repeat(2, 1fr); }
+  .numeros > div { border-left:0; border-top:1px solid var(--linha-2); }
+  .numeros > div:nth-child(-n+2) { border-top:0; }
+  .numeros > div:nth-child(even) { border-left:1px solid var(--linha-2); }
+  .duas-col { grid-template-columns:minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  #v-login { grid-template-columns:1fr; min-height:auto; }
+  .login-arte { padding:32px 20px; gap:24px; }
+  .login-arte ol { display:none; }
+  .topo-in { flex-wrap:wrap; gap:8px 14px; padding:10px 16px; }
+  nav.abas { order:3; width:100%; overflow-x:auto; scrollbar-width:none; }
+  .cota { display:none; }
+  main { padding:20px 16px 48px; }
+  .linha-form { grid-template-columns:1fr !important; }
+  .vazio { padding:32px 20px; }
+  .vazio h2 { font-size:1.5rem; }
+  .numeros .n { font-size:1.6rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<section id="v-login" hidden>
+  <div class="login-arte">
+    <div class="placa"><div><div class="via">Captador</div><div class="sub">Captação imobiliária</div></div></div>
+    <div>
+      <h1>Do endereço ao dono do imóvel em uma consulta.</h1>
+      <p>Você vê um imóvel que quer captar e só tem o endereço. O Captador encontra quem mora lá, confirma o proprietário pela matrícula e entrega o WhatsApp dele.</p>
+    </div>
+    <ol>
+      <li><b>1</b><span>Digite o CEP e o número</span></li>
+      <li><b>2</b><span>Veja quem mora e os telefones</span></li>
+      <li><b>3</b><span>Lead quente? Confirme o dono pela matrícula</span></li>
+      <li><b>4</b><span>Chame no WhatsApp e registre o resultado</span></li>
+    </ol>
+  </div>
+  <div class="login-caixa">
+    <div>
+      <div>
+        <h2>Entrar</h2>
+        <p class="muted" id="login-sub" style="margin-top:6px">Use o e-mail e a senha que o gestor cadastrou.</p>
+      </div>
+      <div class="demo-opcoes" id="demo-opcoes" hidden>
+        <button class="demo-opcao" data-papel="corretor"><span class="av">AS</span><span><b>Entrar como corretora</b><span class="muted small">Ana Souza: buscar, confirmar dono e abordar</span></span></button>
+        <button class="demo-opcao" data-papel="gestor"><span class="av">CM</span><span><b>Entrar como gestora</b><span class="muted small">Carla Mendes: painel, fila de matrículas e equipe</span></span></button>
+      </div>
+      <div class="separador" id="demo-sep" hidden>ou com e-mail</div>
+      <form id="f-login" class="campos">
+        <div><label for="l-email">E-mail</label><input id="l-email" type="email" autocomplete="username" required></div>
+        <div><label for="l-senha">Senha</label><input id="l-senha" type="password" autocomplete="current-password" required></div>
+        <button class="btn btn-primario btn-bloco">Entrar</button>
+        <p class="erro" id="l-erro" role="alert"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APP ============ -->
+<section id="v-app" hidden>
+  <div class="faixa-demo" id="faixa-demo" hidden>Modo demonstração: nomes, CPFs e telefones são fictícios.</div>
+  <header class="topo">
+    <div class="topo-in">
+      <a class="marca" href="#buscar" aria-label="Captador, início"><span class="placa"><div>Captador</div></span></a>
+      <nav class="abas" aria-label="Seções">
+        <button data-view="buscar">Buscar</button>
+        <button data-view="fila" data-gestor>Matrículas</button>
+        <button data-view="painel" data-gestor>Painel</button>
+      </nav>
+      <div class="usuario">
+        <span class="cota" id="cota"></span>
+        <span id="u-nome"></span>
+        <button class="sair" id="sair">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div id="view-buscar" class="busca">
+      <aside class="painel-lateral">
+        <form class="bloco campos" id="f-busca">
+          <h2 style="margin:0">Qual imóvel você quer captar?</h2>
+          <div class="campos-2">
+            <div><label for="b-cep">CEP</label><input id="b-cep" inputmode="numeric" placeholder="00000-000" required maxlength="9"></div>
+            <div><label for="b-num">Número</label><input id="b-num" inputmode="numeric" required maxlength="10"></div>
+          </div>
+          <div><label for="b-comp">Complemento <span class="muted">(opcional)</span></label><input id="b-comp" placeholder="Apto, bloco, casa" maxlength="40"></div>
+          <div><label for="b-fin">Para quê?</label><select id="b-fin"></select></div>
+          <button class="btn btn-primario btn-bloco" id="b-btn">Buscar dono</button>
+          <p class="erro" id="b-erro" role="alert"></p>
+        </form>
+        <div class="bloco">
+          <h2>Seus últimos imóveis</h2>
+          <ul class="recentes" id="recentes"></ul>
+        </div>
+      </aside>
+      <section id="resultado" aria-live="polite"></section>
+    </div>
+
+    <div id="view-fila" hidden>
+      <div class="titulo-pagina">
+        <div><h1>Fila de matrículas</h1>
+          <p class="muted" style="margin-top:6px;max-width:62ch">Endereços em que o bureau não achou ninguém. Veja a matrícula no <a href="https://ridigital.org.br" target="_blank" rel="noopener">RI Digital</a>, envie o PDF para leitura automática ou digite o dono.</p></div>
+      </div>
+      <div class="fila" id="fila"></div>
+      <form class="bloco campos" id="f-optout" style="margin-top:28px;max-width:560px">
+        <h2 style="margin:0">Bloquear contato</h2>
+        <p class="muted small">Quando alguém pede por outro canal para não ser procurado, bloqueie o CPF ou o telefone aqui. O bloqueio vale para toda a equipe.</p>
+        <div class="campos-2">
+          <div><label for="o-valor">CPF ou telefone</label><input id="o-valor" required></div>
+          <div><label for="o-motivo">Motivo</label><input id="o-motivo" placeholder="Pedido por e-mail"></div>
+        </div>
+        <div><button class="btn btn-sec">Bloquear contato</button></div>
+      </form>
+    </div>
+
+    <div id="view-painel" hidden>
+      <div class="titulo-pagina">
+        <div><h1>Painel da equipe</h1><p class="muted" style="margin-top:6px">Consultas, custo e captações de todos os corretores.</p></div>
+        <button class="btn btn-sec" id="p-atualizar">Atualizar</button>
+      </div>
+      <div id="painel"></div>
+    </div>
+  </main>
+</section>
+
+<div id="toast" role="status" hidden></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const cepFmt = c => String(c || '').replace(/^(\d{5})(\d{3})$/, '$1-$2');
+const tituloNome = n => n.toLowerCase().replace(/(^|\s)(\S)/g, (m, a, b) => a + b.toUpperCase()).replace(/\b(Da|De|Do|Dos|Das|E)\b/g, w => w.toLowerCase());
+const dataHora = s => { const d = new Date(String(s).replace(' ', 'T') + 'Z'); return isNaN(d) ? '' : d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }); };
+const estado = { me: null, config: null, ultimo: null };
+
+async function api(url, opts = {}) {
+  const r = await fetch(url, { credentials: 'same-origin', ...opts });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401 && !url.includes('/login') && !url.endsWith('/api/me')) { mostrarLogin(); throw new Error('Sua sessão expirou. Entre de novo.'); }
+  if (!r.ok) {
+    const msg = typeof j.detail === 'string' ? j.detail
+      : Array.isArray(j.detail) ? 'Confira os campos: ' + j.detail.map(d => d.loc?.slice(-1)[0]).join(', ')
+      : 'Algo deu errado. Tente de novo.';
+    throw new Error(msg);
+  }
+  return j;
+}
+const post = (url, body) => api(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3200); }
+function ocupado(btn, sim, texto) { if (sim) { btn.dataset.txt = btn.textContent; btn.textContent = texto; btn.disabled = true; } else { btn.textContent = btn.dataset.txt; btn.disabled = false; } }
+
+/* ---------- sessão ---------- */
+function mostrarLogin() {
+  $('#v-app').hidden = true; $('#v-login').hidden = false;
+  const demo = estado.config?.demo;
+  $('#demo-opcoes').hidden = !demo; $('#demo-sep').hidden = !demo;
+  $('#login-sub').textContent = demo ? 'Escolha um perfil para ver a demonstração.' : 'Use o e-mail e a senha que o gestor cadastrou.';
+}
+async function entrar() {
+  estado.me = await api('/api/me');
+  $('#v-login').hidden = true; $('#v-app').hidden = false;
+  $('#faixa-demo').hidden = !estado.config.demo;
+  $('#u-nome').textContent = estado.me.nome;
+  $$('[data-gestor]').forEach(b => b.hidden = estado.me.papel !== 'gestor');
+  atualizarCota();
+  irPara(location.hash.slice(1) || (estado.me.papel === 'gestor' ? 'painel' : 'buscar'));
+}
+function atualizarCota() { $('#cota').innerHTML = `<b>${estado.me.consultas_hoje}</b> de ${estado.me.limite_dia} consultas hoje`; }
+
+$$('.demo-opcao').forEach(b => b.onclick = async () => {
+  try { await post('/api/login-demo', { papel: b.dataset.papel }); history.replaceState(null, '', location.pathname); await entrar(); }
+  catch (e) { $('#l-erro').textContent = e.message; }
+});
+$('#f-login').onsubmit = async ev => {
+  ev.preventDefault(); $('#l-erro').textContent = '';
+  try { await post('/api/login', { email: $('#l-email').value, senha: $('#l-senha').value }); await entrar(); }
+  catch (e) { $('#l-erro').textContent = e.message; }
+};
+$('#sair').onclick = async () => {
+  await post('/api/logout', {}); estado.me = null; estado.ultimo = null; $('#resultado').innerHTML = '';
+  history.replaceState(null, '', location.pathname); mostrarLogin();
+};
+
+/* ---------- navegação ---------- */
+function irPara(view) {
+  if (!['buscar', 'fila', 'painel'].includes(view) || (view !== 'buscar' && estado.me.papel !== 'gestor')) view = 'buscar';
+  $$('nav.abas button').forEach(b => b.dataset.view === view ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
+  ['buscar', 'fila', 'painel'].forEach(v => $('#view-' + v).hidden = v !== view);
+  if (location.hash.slice(1) !== view) history.replaceState(null, '', '#' + view);
+  if (view === 'buscar') { carregarRecentes(); if (!estado.ultimo) vazio(); }
+  if (view === 'fila') carregarFila().catch(e => toast(e.message));
+  if (view === 'painel') carregarPainel().catch(e => toast(e.message));
+}
+$$('nav.abas button').forEach(b => b.onclick = () => irPara(b.dataset.view));
+$('.marca').onclick = ev => { ev.preventDefault(); irPara('buscar'); };
+window.addEventListener('hashchange', () => { if (estado.me) irPara(location.hash.slice(1)); });
+
+/* ---------- buscar ---------- */
+$('#b-cep').addEventListener('input', e => { const d = e.target.value.replace(/\D/g, '').slice(0, 8); e.target.value = d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d; });
+
+function vazio() {
+  $('#resultado').innerHTML = `<div class="vazio">
+    <h2>Digite um endereço para descobrir quem é o dono.</h2>
+    <p class="muted">A primeira consulta de um imóvel busca no bureau quem mora lá. As próximas saem da base da Beam, na hora e sem custo.</p>
+    ${estado.config.demo ? `<button class="btn btn-sec" id="exemplo">Preencher um exemplo</button>` : ''}
+  </div>`;
+  const ex = $('#exemplo');
+  if (ex) ex.onclick = () => { $('#b-cep').value = '04538-133'; $('#b-num').value = String(3000 + Math.floor(Math.random() * 400)); $('#b-comp').value = ''; $('#b-btn').focus(); };
+}
+
+$('#f-busca').onsubmit = async ev => {
+  ev.preventDefault(); $('#b-erro').textContent = '';
+  const btn = $('#b-btn'); ocupado(btn, true, 'Buscando…');
+  try {
+    const r = await post('/api/consulta', { finalidade: $('#b-fin').value, cep: $('#b-cep').value, numero: $('#b-num').value, complemento: $('#b-comp').value });
+    estado.me.consultas_hoje++; atualizarCota();
+    render(r, true); carregarRecentes();
+    if (matchMedia('(max-width: 980px)').matches) $('#resultado').scrollIntoView({ block: 'start' });
+  } catch (e) { $('#b-erro').textContent = e.message; }
+  finally { ocupado(btn, false); }
+};
+
+async function carregarRecentes() {
+  try {
+    const itens = await api('/api/recentes');
+    $('#recentes').innerHTML = itens.length ? itens.map(i => `<li><button data-cep="${esc(i.cep)}" data-num="${esc(i.numero)}" data-comp="${esc(i.complemento)}">
+        <span><span class="rua">${esc(i.logradouro || 'CEP ' + cepFmt(i.cep))}, ${esc(i.numero)}</span>${i.complemento ? `<br><span class="muted small">${esc(i.complemento)}</span>` : ''}</span>
+        ${i.dono_confirmado ? '<span class="selo selo-ok">Dono</span>' : i.tem_pessoas ? '<span class="selo selo-neutro">Morador</span>' : '<span class="selo selo-aviso">Na fila</span>'}
+      </button></li>`).join('')
+      : '<li class="muted small">Os imóveis que você buscar aparecem aqui.</li>';
+    $$('#recentes button').forEach(b => b.onclick = () => {
+      $('#b-cep').value = cepFmt(b.dataset.cep); $('#b-num').value = b.dataset.num; $('#b-comp').value = b.dataset.comp;
+      $('#f-busca').requestSubmit();
+    });
+  } catch {}
+}
+
+const SITUACAO = {
+  dono: ['selo-ok', 'Proprietário confirmado pela matrícula'],
+  dono_mora: ['selo-ok', 'Proprietário confirmado, mora no imóvel'],
+  provavel_dono: ['selo-placa', 'Mora no imóvel, provável dono'],
+  inquilino: ['selo-aviso', 'Mora no imóvel, não é o dono'],
+};
+
+function htmlPessoa(p) {
+  const [cls, txt] = SITUACAO[p.situacao];
+  const fones = p.bloqueado ? `<div class="faixa faixa-erro">Pediu para não ser contatado. Os telefones ficam ocultos para toda a equipe.</div>`
+    : p.contatos.length ? `<div class="fones">${p.contatos.map(c => {
+        const d = c.valor.replace(/\D/g, '');
+        return `<div class="fone"><div><span class="num">${esc(c.valor)}</span> <span class="muted small">${c.tipo === 'celular' ? 'celular' : 'fixo'}</span></div>
+          <div class="acoes">${c.whatsapp ? `<a class="btn btn-zap" href="https://wa.me/55${d}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
+          <a class="btn btn-sec" href="tel:+55${d}">Ligar</a></div></div>`; }).join('')}</div>`
+    : '<p class="muted">Nenhum telefone encontrado para esta pessoa.</p>';
+  return `<article class="pessoa ${p.papel === 'proprietario' ? 'dono' : ''}">
+    <div class="pessoa-topo"><div><h3>${esc(tituloNome(p.nome))}</h3><p class="muted small">CPF ${esc(p.cpf)}</p></div>
+      <span class="selo ${cls}">${txt}</span></div>
+    ${fones}</article>`;
+}
+
+function render(r, animar) {
+  estado.ultimo = r;
+  const i = r.imovel;
+  const via = i.logradouro || 'CEP ' + cepFmt(i.cep);
+  const origem = r.origem === 'base_propria' ? `<span class="selo selo-ok">Veio da base da Beam, sem custo</span>`
+    : r.origem === 'matricula' ? `<span class="selo selo-placa">Matrícula consultada: ${brl(r.custo)}</span>`
+    : `<span class="selo selo-neutro">Consulta nova: ${brl(r.custo)}</span>`;
+  const passos = (r.passos || []).map((p, k) => `<li style="animation-delay:${k * 140}ms"><span class="ponto">${k + 1}</span>
+      <div><div class="etapa">${esc(p.etapa)}</div><div class="det">${esc(p.detalhe)} <span class="muted">(${esc(p.fonte)})</span></div></div>
+      <span class="custo">${p.custo ? brl(p.custo) : 'grátis'}</span></li>`).join('');
+  const rota = passos ? `<details class="bloco rota-caixa" ${animar ? 'open' : ''}><summary>Como o Captador chegou nisso <span class="muted">${r.passos.length} etapas</span></summary>
+      <ol class="rota ${animar ? 'animar' : ''}">${passos}</ol></details>` : '';
+
+  let corpo;
+  if (r.status === 'pendente_matricula') {
+    corpo = `<div class="bloco" style="display:grid;gap:10px"><h3>O bureau não achou ninguém neste endereço</h3>
+      <p class="muted">O imóvel foi para a fila de matrículas. Um gestor vai localizar o dono no cartório. Quando isso acontecer, busque de novo: a resposta sai da base, sem custo.</p></div>`;
+  } else {
+    const confirmar = i.dono_confirmado
+      ? `<p class="muted small">Matrícula ${esc(i.matricula)}, ${esc(i.cartorio)}.</p>`
+      : `<form class="confirmar" id="f-confirmar">
+          <div><h3>Lead quente? Confirme o dono pela matrícula</h3>
+          <p class="muted small" style="margin-top:4px">Quem mora lá pode ser inquilino. O Captador puxa a matrícula no RI Digital e mostra quem é o proprietário.</p></div>
+          <div class="campos-2"><div><label for="c-cart">Cartório</label><input id="c-cart" required placeholder="4º Registro de Imóveis de SP" value="${esc(i.cartorio)}"></div>
+          <div><label for="c-mat">Número da matrícula</label><input id="c-mat" required inputmode="numeric" value="${esc(i.matricula)}"></div></div>
+          <div><button class="btn btn-primario" id="c-btn">Confirmar dono</button> <span class="muted small">custo estimado ${brl(45)}</span></div>
+          <p class="erro" id="c-erro" role="alert"></p></form>`;
+    const aptos = i.pessoas.filter(p => !p.bloqueado);
+    const abordar = aptos.length ? `<form class="bloco campos" id="f-abordagem">
+        <h2 style="margin:0">Registrar contato</h2>
+        <div class="linha-form">
+          <div><label for="a-pes">Com quem</label><select id="a-pes">${aptos.map(p => `<option value="${p.id}">${esc(tituloNome(p.nome))}</option>`).join('')}</select></div>
+          <div><label for="a-can">Como</label><select id="a-can"><option value="whatsapp">WhatsApp</option><option value="ligacao">Ligação</option><option value="visita">Visita</option></select></div>
+          <div><label for="a-res">Resultado</label><select id="a-res">${Object.entries(estado.config.resultados).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('')}</select></div>
+        </div>
+        <div><label for="a-obs">Anotação <span class="muted">(opcional)</span></label><input id="a-obs" maxlength="500" placeholder="Ex.: pediu para ligar depois das 18h"></div>
+        <div><button class="btn btn-sec">Salvar contato</button></div>
+        ${i.abordagens.length ? `<ul class="historico">${i.abordagens.map(a => `<li><span><b>${esc(a.resultado_txt)}</b>${a.pessoa ? ' com ' + esc(tituloNome(a.pessoa)) : ''}${a.observacao ? `<br><span class="muted">${esc(a.observacao)}</span>` : ''}</span><span class="muted small">${esc(a.corretor)}, ${dataHora(a.criado_em)}</span></li>`).join('')}</ul>` : ''}
+      </form>` : '';
+    corpo = `<div class="pessoas">${i.pessoas.map(htmlPessoa).join('')}</div>
+      <p class="aviso-lgpd">Ao abordar, diga seu nome e a Beam, conte que o contato veio de registros públicos e bases licenciadas, e ofereça a opção de não ser mais procurado.</p>
+      ${confirmar}${abordar}`;
+  }
+
+  $('#resultado').innerHTML = `<div class="resultado">
+    <div class="cabeca">
+      <div class="placas">
+        <div class="placa"><div><div class="via">${esc(via)}</div><div class="sub">${esc(i.bairro || '')}${i.bairro ? ', ' : ''}CEP ${esc(cepFmt(i.cep))}</div></div></div>
+        <div class="placa placa-num"><div><div class="via">${esc(i.numero)}</div>${i.complemento ? `<div class="sub">${esc(i.complemento)}</div>` : ''}</div></div>
+      </div>
+      <div class="cabeca-meta">${origem}${i.dono_confirmado ? '<span class="selo selo-ok">Dono confirmado</span>' : ''}</div>
+    </div>
+    <div id="faixa-confirmacao"></div>
+    ${corpo}
+    ${rota}
+  </div>`;
+
+  const fc = $('#f-confirmar');
+  if (fc) fc.onsubmit = async ev => {
+    ev.preventDefault(); $('#c-erro').textContent = '';
+    const btn = $('#c-btn'); ocupado(btn, true, 'Consultando a matrícula…');
+    try {
+      const c = await post(`/api/imoveis/${i.id}/confirmar-dono`, { cartorio: $('#c-cart').value, matricula: $('#c-mat').value });
+      render({ status: 'encontrado', origem: 'matricula', custo: c.custo, passos: r.passos, imovel: c.imovel }, false);
+      $('#faixa-confirmacao').innerHTML = c.dono_e_morador
+        ? `<div class="faixa faixa-ok">Quem mora lá é o proprietário. Pode chamar direto.</div>`
+        : `<div class="faixa faixa-aviso">Quem mora lá não é o dono, provavelmente é inquilino. O proprietário e os telefones dele estão logo abaixo.</div>`;
+      $('#faixa-confirmacao').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+      carregarRecentes();
+    } catch (e) { $('#c-erro').textContent = e.message; ocupado(btn, false); }
+  };
+  const fa = $('#f-abordagem');
+  if (fa) fa.onsubmit = async ev => {
+    ev.preventDefault();
+    try {
+      await post('/api/abordagens', { imovel_id: i.id, pessoa_id: Number($('#a-pes').value), canal: $('#a-can').value, resultado: $('#a-res').value, observacao: $('#a-obs').value });
+      toast('Contato salvo.');
+      const r2 = await post('/api/consulta', { finalidade: $('#b-fin').value, cep: i.cep, numero: i.numero, complemento: i.complemento });
+      estado.me.consultas_hoje++; atualizarCota(); render(r2, false);
+    } catch (e) { toast(e.message); }
+  };
+}
+
+/* ---------- fila ---------- */
+async function carregarFila() {
+  const itens = await api('/api/pendencias');
+  $('#fila').innerHTML = itens.length ? itens.map(it => `<form class="bloco" data-id="${it.id}">
+      <div><h3>${esc(it.logradouro || 'CEP ' + cepFmt(it.cep))}, ${esc(it.numero)}${it.complemento ? ', ' + esc(it.complemento) : ''}</h3>
+        <p class="muted small">${esc(it.bairro)}${it.bairro ? ', ' : ''}CEP ${esc(cepFmt(it.cep))}. Pedido por ${esc(it.solicitado_por)} em ${dataHora(it.solicitado_em)}.</p></div>
+      <div><label>PDF da matrícula <span class="muted">(preenche os campos sozinho)</span></label><input type="file" accept="application/pdf" class="pdf"></div>
+      <div class="linha-form" style="grid-template-columns:2fr 1fr">
+        <div><label>Nome do proprietário</label><input class="nome" required></div><div><label>CPF</label><input class="cpf" required inputmode="numeric"></div>
+      </div>
+      <div class="linha-form" style="grid-template-columns:1fr 2fr">
+        <div><label>Nº da matrícula</label><input class="mat"></div><div><label>Cartório</label><input class="cart" placeholder="4º Registro de Imóveis de SP"></div>
+      </div>
+      <p class="candidatos"></p>
+      <div><button class="btn btn-primario">Salvar proprietário</button> <span class="erro m"></span></div>
+    </form>`).join('')
+    : `<div class="vazio"><h2>Nenhum endereço esperando matrícula.</h2><p class="muted">Quando o bureau não encontrar ninguém em um endereço, ele aparece aqui para você resolver.</p></div>`;
+  $$('#fila form').forEach(f => {
+    const q = s => f.querySelector(s);
+    q('.pdf').onchange = async e => {
+      if (!e.target.files[0]) return;
+      const fd = new FormData(); fd.append('arquivo', e.target.files[0]);
+      try {
+        const r = await api('/api/matricula/analisar', { method: 'POST', body: fd });
+        q('.mat').value = r.matricula;
+        if (r.sugestao) { q('.nome').value = r.sugestao.nome; q('.cpf').value = r.sugestao.cpf; }
+        q('.candidatos').textContent = r.candidatos.length
+          ? 'Pessoas na matrícula, da mais antiga para a mais recente: ' + r.candidatos.map(c => `${c.nome || 'sem nome'} (${c.cpf})`).join(', ') + '. Preenchemos com a última; confira antes de salvar.'
+          : 'Não encontramos CPF no PDF. Digite os dados.';
+      } catch (err) { q('.m').textContent = err.message; }
+    };
+    f.onsubmit = async ev => {
+      ev.preventDefault();
+      try {
+        await post(`/api/imoveis/${f.dataset.id}/proprietario`, { nome: q('.nome').value, cpf: q('.cpf').value, matricula: q('.mat').value, cartorio: q('.cart').value });
+        toast('Proprietário salvo. O imóvel saiu da fila.'); carregarFila();
+      } catch (err) { q('.m').textContent = err.message; }
+    };
+  });
+}
+$('#f-optout').onsubmit = async ev => {
+  ev.preventDefault();
+  try { await post('/api/optout', { valor: $('#o-valor').value, motivo: $('#o-motivo').value }); toast('Contato bloqueado para toda a equipe.'); ev.target.reset(); }
+  catch (e) { toast(e.message); }
+};
+
+/* ---------- painel ---------- */
+const RESULTADO_CONSULTA = { base_propria: 'Base da Beam', bureau: 'Bureau', pendente_matricula: 'Foi para a fila', confirmacao_dono: 'Matrícula' };
+async function carregarPainel() {
+  const r = await api('/api/relatorio');
+  const pct = r.consultas ? Math.round(100 * r.respostas_base_propria / r.consultas) : 0;
+  const f = r.funil, max = Math.max(f.consultas, 1);
+  const barra = (nome, v) => `<div class="funil-linha"><span>${nome}</span><div class="funil-barra"><span style="width:${(100 * v / max).toFixed(1)}%"></span></div><b>${v}</b></div>`;
+  const plural = (n, s, p) => `${n} ${n === 1 ? s : p}`;
+  $('#painel').innerHTML = `
+    <div class="numeros">
+      <div><div class="n">${r.consultas}</div><div class="r">consultas de endereço</div></div>
+      <div><div class="n">${pct}%</div><div class="r">respondidas pela base da Beam</div></div>
+      <div><div class="n">${brl(r.economia_base_propria)}</div><div class="r">economizados com a base</div></div>
+      <div><div class="n">${r.donos_confirmados}</div><div class="r">donos confirmados na matrícula</div></div>
+      <div><div class="n">${brl(r.custo_total)}</div><div class="r">gasto com bureau e matrícula</div></div>
+    </div>
+    <div class="duas-col">
+      <section class="bloco"><h2>Do endereço à captação</h2><div class="funil">
+        ${barra('Consultas', f.consultas)}${barra('Abordados', f.abordados)}${barra('Agendados', f.agendados)}${barra('Captados', f.captados)}
+      </div>
+      <p class="muted small" style="margin-top:14px">${f.captados ? `Custo por captação até agora: <b>${brl(r.custo_total / f.captados)}</b>. ` : 'Nenhuma captação registrada ainda. '}${plural(r.pendentes, 'endereço', 'endereços')} na fila de matrículas, ${plural(r.optouts, 'contato bloqueado', 'contatos bloqueados')}.</p></section>
+      <section class="bloco"><h2>Corretores</h2><div class="tabela-rolagem"><table>
+        <thead><tr><th>Corretor</th><th class="num">Consultas</th><th class="num">Contatos</th><th class="num">Captações</th><th class="num">Custo</th></tr></thead>
+        <tbody>${r.por_corretor.map(c => `<tr><td>${esc(c.nome)}</td><td class="num">${c.consultas}</td><td class="num">${c.abordagens}</td><td class="num">${c.captacoes}</td><td class="num">${brl(c.custo)}</td></tr>`).join('')}</tbody>
+      </table></div></section>
+    </div>
+    <section class="bloco" style="margin-top:22px"><h2>Últimas consultas</h2>
+      <p class="muted small" style="margin:-8px 0 12px">Registro de auditoria exigido pela LGPD: quem consultou, quando e para quê.</p>
+      <div class="tabela-rolagem"><table>
+      <thead><tr><th>Quando</th><th>Corretor</th><th>Imóvel</th><th>Para quê</th><th>Resposta</th><th class="num">Custo</th></tr></thead>
+      <tbody>${r.ultimas_consultas.map(c => `<tr><td>${dataHora(c.criado_em)}</td><td>${esc(c.corretor)}</td>
+        <td>${esc(c.logradouro || '')}, ${esc(c.numero || '')}${c.complemento ? ', ' + esc(c.complemento) : ''}</td>
+        <td>${esc(estado.config.finalidades[c.finalidade] || 'Confirmação de dono')}</td><td>${esc(RESULTADO_CONSULTA[c.resultado])}</td><td class="num">${brl(c.custo)}</td></tr>`).join('')}</tbody>
+    </table></div></section>`;
+}
+$('#p-atualizar').onclick = () => carregarPainel().catch(e => toast(e.message));
+
+/* ---------- início ---------- */
+(async () => {
+  try { estado.config = await (await fetch('/api/config')).json(); } catch { estado.config = { demo: false, finalidades: {}, resultados: {} }; }
+  $('#b-fin').innerHTML = Object.entries(estado.config.finalidades).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('');
+  try { await entrar(); } catch { mostrarLogin(); }
+})();
+</script>
+</body>
+</html>
